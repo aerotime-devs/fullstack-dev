@@ -1,3 +1,10 @@
+**How-To**
+- Fork this repo.
+- Complete task fulfilling requirements.
+- Prepare pull request and let us know. 
+
+
+**Fullstack Php Developer Task**
 
 Let’s say we have a business requirement to register a Lead. The customer's desire to import data to the lead-register using CSV files.
 
