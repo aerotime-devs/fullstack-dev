@@ -56,6 +56,29 @@ function newLead($firstname, $lastname, $email, $phone1, $phone2, $comment) {
     }
 }
 
+function deleteLead($id) {
+    if (file_exists('leads.json')) {
+        $json = file_get_contents('leads.json');
+        $data = json_decode($json);
+        if (isset($data->items[$id - 1])) {
+            $firstname = $data->items[$id - 1]->firstname;
+            $lastname = $data->items[$id - 1]->lastname;
+            $email = $data->items[$id - 1]->email;
+            unset($data->items[$id - 1]);
+            $array = array_values($data->items);
+            $data->items = $array;
+            $json = json_encode($data);
+            file_put_contents('leads.json', $json);
+            echo "succesfully deleted lead with id $id - $firstname $lastname $email\n";
+        } else {
+            echo 'lead id is not in lead registry'.PHP_EOL;
+        }
+        
+    } else {
+        echo 'nothing to delete, lead registry is empty'.PHP_EOL;
+    }
+}
+
 ## Commands
 if (count($argv) > 1) {
     if ($argv[1] == 'list') {
@@ -64,15 +87,17 @@ if (count($argv) > 1) {
         if (isset($argv[2]) && isset($argv[3]) && isset($argv[4]) && isset($argv[5]) && isset($argv[6]) && isset($argv[7])) {
             newLead($argv[2], $argv[3], $argv[4], $argv[5], $argv[6], $argv[7]);
         } else {
-            echo 'Too few arguments, usage: \'aerolead new [username] [email]\'';
+            echo 'Too few arguments, usage: \'aerolead new [firstname] [lastname] [email] [phone1] [phone2] [\'comment\']\''.PHP_EOL;
         }
+    } elseif ($argv[1] == 'delete') {
+        deleteLead($argv[2]);
     } elseif ($argv[1] == 'help') {
-        echo "This is Aero lead registration tool.\n\nAvailable commands:\n\nlist - List all registered leads.\nnew [firstname] [lastname] [email] [phone1] [phone2] [\'comment\'] - Add new lead.\ndelete [id] - Delete existing lead.\n";
+        echo "This is Aero lead registration tool.\n\nAvailable commands:\n\nlist - List all registered leads.\nnew [firstname] [lastname] [email] [phone1] [phone2] ['comment'] - Add new lead.\ndelete [id] - Delete existing lead.\n";
     } else {
         echo 'ERROR: Unknown command. Use \'aerotime help\' to see the list of available commands.';
     }
 } else {
-    echo "This is Aero lead registration tool.\n\nAvailable commands:\n\nlist - List all registered leads.\nnew [firstname] [lastname] [email] [phone1] [phone2] [\'comment\'] - Add new lead.\ndelete [id] - Delete existing lead.\n";
+    echo "This is Aero lead registration tool.\n\nAvailable commands:\n\nlist - List all registered leads.\nnew [firstname] [lastname] [email] [phone1] [phone2] ['comment'] - Add new lead.\ndelete [id] - Delete existing lead.\n";
 }
 
 ?>
