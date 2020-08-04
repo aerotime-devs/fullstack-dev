@@ -7,20 +7,30 @@ function listLeads() {
         $data = json_decode($json);
         foreach ($data->items as $key => $lead) {
             $id = $key + 1;
-            $username = $lead->username;
+            $firstname = $lead->firstname;
+            $lastname = $lead->lastname;
             $email = $lead->email;
-            echo "$id. $username $email\n";
+            $phone1 = $lead->phone1;
+            $phone2 = $lead->phone2;
+            $comment = $lead->comment;
+            echo "$id. $firstname $lastname $email $phone1 $phone2 $comment\n";
         }
+    } else {
+        echo 'lead registry is empty'.PHP_EOL;
     }
 }
 
-function newLead($username, $email) {
+function newLead($firstname, $lastname, $email, $phone1, $phone2, $comment) {
     if (file_exists('leads.json')) {
         $json = file_get_contents('leads.json');
         $data = json_decode($json);
         array_push($data->items, array(
-            'username' => $username,
-            'email' => $email
+            'firstname' => $firstname,
+            'lastname' => $lastname,
+            'email' => $email,
+            'phone1' => $phone1,
+            'phone2' => $phone2,
+            'comment' => $comment
         ));
         $data->updated_at = time();
         $json = json_encode($data);
@@ -31,8 +41,12 @@ function newLead($username, $email) {
             'updated_at' => time(),
             'items' => array(
                 array(
-                    'username' => $username,
-                    'email' => $email
+                    'firstname' => $firstname,
+                    'lastname' => $lastname,
+                    'email' => $email,
+                    'phone1' => $phone1,
+                    'phone2' => $phone2,
+                    'comment' => $comment
                 )
             )
         );
@@ -42,32 +56,23 @@ function newLead($username, $email) {
     }
 }
 
-
 ## Commands
 if (count($argv) > 1) {
     if ($argv[1] == 'list') {
         listLeads();
     } elseif ($argv[1] == 'new') {
-        if (isset($argv[2]) && isset($argv[3])) {
-            newLead($argv[2], $argv[3]);
+        if (isset($argv[2]) && isset($argv[3]) && isset($argv[4]) && isset($argv[5]) && isset($argv[6]) && isset($argv[7])) {
+            newLead($argv[2], $argv[3], $argv[4], $argv[5], $argv[6], $argv[7]);
         } else {
             echo 'Too few arguments, usage: \'aerolead new [username] [email]\'';
         }
     } elseif ($argv[1] == 'help') {
-        echo 'This is Aero lead registration tool.'.PHP_EOL.
-        'Available commands:'.PHP_EOL.PHP_EOL.
-        'list - List all registered leads.'.PHP_EOL.
-        'new [name] [email] - Add new lead.'.PHP_EOL.
-        'delete [name] [email] - Delete existing lead.';
+        echo "This is Aero lead registration tool.\n\nAvailable commands:\n\nlist - List all registered leads.\nnew [firstname] [lastname] [email] [phone1] [phone2] [\'comment\'] - Add new lead.\ndelete [id] - Delete existing lead.\n";
     } else {
         echo 'ERROR: Unknown command. Use \'aerotime help\' to see the list of available commands.';
     }
 } else {
-    echo 'This is Aero lead registration tool.'.PHP_EOL.
-    'Available commands:'.PHP_EOL.PHP_EOL.
-    'list - List all registered leads.'.PHP_EOL.
-    'new [name] [email] - Add new lead.'.PHP_EOL.
-    'delete [name] [email] - Delete existing lead.'.PHP_EOL;
+    echo "This is Aero lead registration tool.\n\nAvailable commands:\n\nlist - List all registered leads.\nnew [firstname] [lastname] [email] [phone1] [phone2] [\'comment\'] - Add new lead.\ndelete [id] - Delete existing lead.\n";
 }
 
 ?>
