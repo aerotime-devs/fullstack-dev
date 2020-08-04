@@ -60,11 +60,12 @@ function deleteLead($id) {
     if (file_exists('leads.json')) {
         $json = file_get_contents('leads.json');
         $data = json_decode($json);
-        if (isset($data->items[$id - 1])) {
-            $firstname = $data->items[$id - 1]->firstname;
-            $lastname = $data->items[$id - 1]->lastname;
-            $email = $data->items[$id - 1]->email;
-            unset($data->items[$id - 1]);
+        $i = $id - 1;
+        if (isset($data->items[$i])) {
+            $firstname = $data->items[$i]->firstname;
+            $lastname = $data->items[$i]->lastname;
+            $email = $data->items[$i]->email;
+            unset($data->items[$i]);
             $array = array_values($data->items);
             $data->items = $array;
             $json = json_encode($data);
