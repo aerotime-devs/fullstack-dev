@@ -1,97 +1,120 @@
 #!/usr/bin/env php
 <?php
 
-function listLeads() {
-    if (file_exists('leads.json')) {
-        $json = file_get_contents('leads.json');
-        $data = json_decode($json);
-        foreach ($data->items as $key => $lead) {
-            $id = $key + 1;
-            $firstname = $lead->firstname;
-            $lastname = $lead->lastname;
-            $email = $lead->email;
-            $phone1 = $lead->phone1;
-            $phone2 = $lead->phone2;
-            $comment = $lead->comment;
-            echo "$id. $firstname $lastname $email $phone1 $phone2 $comment\n";
-        }
-    } else {
-        echo 'lead registry is empty'.PHP_EOL;
-    }
-}
+class Leads
+{
+    private $datafile = 'leads.json';
 
-function newLead($firstname, $lastname, $email, $phone1, $phone2, $comment) {
-    if (file_exists('leads.json')) {
-        $json = file_get_contents('leads.json');
-        $data = json_decode($json);
-        array_push($data->items, array(
-            'firstname' => $firstname,
-            'lastname' => $lastname,
-            'email' => $email,
-            'phone1' => $phone1,
-            'phone2' => $phone2,
-            'comment' => $comment
-        ));
+    private function fileExists()
+    {
+        if (file_exists($this->datafile)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private function getData()
+    {
+        $json = file_get_contents($this->datafile);
+        return json_decode($json);
+    }
+
+    private function setData($data)
+    {
         $data->updated_at = time();
         $json = json_encode($data);
-        file_put_contents('leads.json', $json);
-        echo 'new lead was added successfully!'.PHP_EOL;
-    } else {
-        $data = array(
-            'updated_at' => time(),
-            'items' => array(
-                array(
-                    'firstname' => $firstname,
-                    'lastname' => $lastname,
-                    'email' => $email,
-                    'phone1' => $phone1,
-                    'phone2' => $phone2,
-                    'comment' => $comment
-                )
-            )
-        );
-        $json = json_encode($data);
-        file_put_contents('leads.json', $json);
-        echo 'new file created and data successfully imported!'.PHP_EOL;
+        file_put_contents($this->datafile, $json);
     }
-}
 
-function deleteLead($id) {
-    if (file_exists('leads.json')) {
-        $json = file_get_contents('leads.json');
-        $data = json_decode($json);
-        $i = $id - 1;
-        if (isset($data->items[$i])) {
-            $firstname = $data->items[$i]->firstname;
-            $lastname = $data->items[$i]->lastname;
-            $email = $data->items[$i]->email;
-            unset($data->items[$i]);
-            $array = array_values($data->items);
-            $data->items = $array;
-            $json = json_encode($data);
-            file_put_contents('leads.json', $json);
-            echo "succesfully deleted lead with id $id - $firstname $lastname $email\n";
+    public function list()
+    {
+        if ($this->fileExists()) {
+            $data = $this->getData();
+            foreach ($data->items as $key => $lead) {
+                $id = $key + 1;
+                $firstname = $lead->firstname;
+                $lastname = $lead->lastname;
+                $email = $lead->email;
+                $phone1 = $lead->phone1;
+                $phone2 = $lead->phone2;
+                $comment = $lead->comment;
+                echo "$id. $firstname $lastname $email $phone1 $phone2 $comment\n";
+            }
         } else {
-            echo 'lead id is not in lead registry'.PHP_EOL;
+            echo 'lead registry is empty'.PHP_EOL;
         }
-        
-    } else {
-        echo 'nothing to delete, lead registry is empty'.PHP_EOL;
+    }
+
+    public function new($firstname, $lastname, $email, $phone1, $phone2, $comment)
+    {
+        if ($this->fileExists()) {
+            $data = $this->getData();
+            array_push($data->items, array(
+                'firstname' => $firstname,
+                'lastname' => $lastname,
+                'email' => $email,
+                'phone1' => $phone1,
+                'phone2' => $phone2,
+                'comment' => $comment
+            ));
+            $this->setData($data);
+            echo 'new lead was added successfully!'.PHP_EOL;
+        } else {
+            $data = array(
+                'updated_at' => time(),
+                'items' => array(
+                    array(
+                        'firstname' => $firstname,
+                        'lastname' => $lastname,
+                        'email' => $email,
+                        'phone1' => $phone1,
+                        'phone2' => $phone2,
+                        'comment' => $comment
+                    )
+                )
+            );
+            $this->setData($data);
+            echo 'new file created and data successfully imported!'.PHP_EOL;
+        }
+    }
+
+    public function delete($id)
+    {
+        if ($this->fileExists()) {
+            $data = $this->getData();
+            $i = $id - 1;
+            if (isset($data->items[$i])) {
+                $firstname = $data->items[$i]->firstname;
+                $lastname = $data->items[$i]->lastname;
+                $email = $data->items[$i]->email;
+                unset($data->items[$i]);
+                $array = array_values($data->items);
+                $data->items = $array;
+                $this->setData($data);
+                echo "succesfully deleted lead with id $id - $firstname $lastname $email\n";
+            } else {
+                echo 'lead id is not in lead registry'.PHP_EOL;
+            }
+        } else {
+            echo 'nothing to delete, lead registry is empty'.PHP_EOL;
+        }
     }
 }
 
-## Commands
+## Check args
 if (count($argv) > 1) {
+    $leads = new Leads;
     if ($argv[1] == 'list') {
-        listLeads();
+        $leads->list();
     } elseif ($argv[1] == 'new') {
         if (isset($argv[2]) && isset($argv[3]) && isset($argv[4]) && isset($argv[5]) && isset($argv[6]) && isset($argv[7])) {
-            newLead($argv[2], $argv[3], $argv[4], $argv[5], $argv[6], $argv[7]);
+            $leads->new($argv[2], $argv[3], $argv[4], $argv[5], $argv[6], $argv[7]);
         } else {
             echo 'Too few arguments, usage: \'aerolead new [firstname] [lastname] [email] [phone1] [phone2] [\'comment\']\''.PHP_EOL;
         }
     } elseif ($argv[1] == 'delete') {
-        deleteLead($argv[2]);
+        $leads->delete($argv[2]);
     } elseif ($argv[1] == 'help') {
         echo "This is Aero lead registration tool.\n\nAvailable commands:\n\nlist - List all registered leads.\nnew [firstname] [lastname] [email] [phone1] [phone2] ['comment'] - Add new lead.\ndelete [id] - Delete existing lead.\n";
     } else {
