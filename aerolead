@@ -1,25 +1,71 @@
 #!/usr/bin/env php
 <?php
 
+function listLeads() {
+    if (file_exists('leads.json')) {
+        $json = file_get_contents('leads.json');
+        $data = json_decode($json);
+        foreach ($data->items as $key => $lead) {
+            $id = $key + 1;
+            $username = $lead->username;
+            $email = $lead->email;
+            echo "$id. $username $email\n";
+        }
+    }
+}
 
-
+function newLead($username, $email) {
+    if (file_exists('leads.json')) {
+        $json = file_get_contents('leads.json');
+        $data = json_decode($json);
+        array_push($data->items, array(
+            'username' => $username,
+            'email' => $email
+        ));
+        $data->updated_at = time();
+        $json = json_encode($data);
+        file_put_contents('leads.json', $json);
+        echo 'new lead was added successfully!'.PHP_EOL;
+    } else {
+        $data = array(
+            'updated_at' => time(),
+            'items' => array(
+                array(
+                    'username' => $username,
+                    'email' => $email
+                )
+            )
+        );
+        $json = json_encode($data);
+        file_put_contents('leads.json', $json);
+        echo 'new file created and data successfully imported!'.PHP_EOL;
+    }
+}
 
 
 ## Commands
 if (count($argv) > 1) {
-    if ($argv[1] == 'new') {
-        echo 'This is new command';
-    } elseif ($argv[1] == 'delete') {
-        echo 'Delete';
+    if ($argv[1] == 'list') {
+        listLeads();
+    } elseif ($argv[1] == 'new') {
+        if (isset($argv[2]) && isset($argv[3])) {
+            newLead($argv[2], $argv[3]);
+        } else {
+            echo 'Too few arguments, usage: \'aerolead new [username] [email]\'';
+        }
     } elseif ($argv[1] == 'help') {
-        echo 'Help message';
+        echo 'This is Aero lead registration tool.'.PHP_EOL.
+        'Available commands:'.PHP_EOL.PHP_EOL.
+        'list - List all registered leads.'.PHP_EOL.
+        'new [name] [email] - Add new lead.'.PHP_EOL.
+        'delete [name] [email] - Delete existing lead.';
     } else {
         echo 'ERROR: Unknown command. Use \'aerotime help\' to see the list of available commands.';
     }
-    echo PHP_EOL;
 } else {
     echo 'This is Aero lead registration tool.'.PHP_EOL.
     'Available commands:'.PHP_EOL.PHP_EOL.
+    'list - List all registered leads.'.PHP_EOL.
     'new [name] [email] - Add new lead.'.PHP_EOL.
     'delete [name] [email] - Delete existing lead.'.PHP_EOL;
 }
