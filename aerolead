@@ -1,0 +1,27 @@
+#!/usr/bin/env php
+<?php
+
+
+
+
+
+## Commands
+if (count($argv) > 1) {
+    if ($argv[1] == 'new') {
+        echo 'This is new command';
+    } elseif ($argv[1] == 'delete') {
+        echo 'Delete';
+    } elseif ($argv[1] == 'help') {
+        echo 'Help message';
+    } else {
+        echo 'ERROR: Unknown command. Use \'aerotime help\' to see the list of available commands.';
+    }
+    echo PHP_EOL;
+} else {
+    echo 'This is Aero lead registration tool.'.PHP_EOL.
+    'Available commands:'.PHP_EOL.PHP_EOL.
+    'new [name] [email] - Add new lead.'.PHP_EOL.
+    'delete [name] [email] - Delete existing lead.'.PHP_EOL;
+}
+
+?>
