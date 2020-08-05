@@ -122,6 +122,25 @@ class Leads
             echo 'no leads found matching the search query'.PHP_EOL;
         }
     }
+
+    public function import($file) {
+        $data = $this->getData();
+        $handle = fopen($file, 'r');
+        $count = 0;
+        while (($csv_data = fgetcsv($handle, 1000)) !== false){
+            array_push($data->items, array(
+                'firstname' => $csv_data[0],
+                'lastname' => $csv_data[1],
+                'email' => $csv_data[2],
+                'phone1' => $csv_data[3],
+                'phone2' => $csv_data[4],
+                'comment' => $csv_data[5]
+            ));
+            $count++;
+        }
+        $this->setData($data);
+        echo 'succesfully imported '.$count.' leads'.PHP_EOL;
+    }
 }
 
 ## Check args
@@ -139,13 +158,15 @@ if (count($argv) > 1) {
         $leads->delete($argv[2]);
     } elseif ($argv[1] == 'find') {
         $leads->find($argv[2]);
+    } elseif ($argv[1] == 'import') {
+        $leads->import($argv[2]);
     } elseif ($argv[1] == 'help') {
-        echo "This is Aero lead registration tool.\n\nAvailable commands:\n\nlist - List all registered leads.\nnew [firstname] [lastname] [email] [phone1] [phone2] ['comment'] - Add new lead.\ndelete [id] - Delete existing lead.\nfind [pattern] - Find leads which match the pattern. Looks for matches in firstname, lastname, email fields.\n";
+        echo "This is Aero lead registration tool.\n\nAvailable commands:\n\nlist - List all registered leads.\nnew [firstname] [lastname] [email] [phone1] [phone2] ['comment'] - Add new lead.\ndelete [id] - Delete existing lead.\nfind [pattern] - Find leads which match the pattern. Looks for matches in firstname, lastname, email fields.\nimport [filename] - Import leads from csv file. Each row must have the following fields in this order: firstname, lastname, email, phone1, phone2, comment.\n";
     } else {
         echo 'ERROR: Unknown command. Use \'aerotime help\' to see the list of available commands.'.PHP_EOL;
     }
 } else {
-    echo "This is Aero lead registration tool.\n\nAvailable commands:\n\nlist - List all registered leads.\nnew [firstname] [lastname] [email] [phone1] [phone2] ['comment'] - Add new lead.\ndelete [id] - Delete existing lead.\nfind [pattern] - Find leads which match the pattern. Looks for matches in firstname, lastname, email fields.\n";
+    echo "This is Aero lead registration tool.\n\nAvailable commands:\n\nlist - List all registered leads.\nnew [firstname] [lastname] [email] [phone1] [phone2] ['comment'] - Add new lead.\ndelete [id] - Delete existing lead.\nfind [pattern] - Find leads which match the pattern. Looks for matches in firstname, lastname, email fields.\nimport [filename] - Import leads from csv file. Each row must have the following fields in this order: firstname, lastname, email, phone1, phone2, comment.\n";
 }
 
 ?>
