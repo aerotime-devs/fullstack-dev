@@ -42,7 +42,7 @@ class Leads
                 echo "$id. $firstname $lastname $email $phone1 $phone2 $comment\n";
             }
         } else {
-            echo 'lead registry is empty'.PHP_EOL;
+            echo 'Lead registry is empty.'.PHP_EOL;
         }
     }
 
@@ -59,7 +59,7 @@ class Leads
                 'comment' => $comment
             ));
             $this->setData($data);
-            echo 'new lead was added successfully!'.PHP_EOL;
+            echo 'New lead was added successfully!'.PHP_EOL;
         } else {
             $data = array(
                 'updated_at' => time(),
@@ -75,7 +75,7 @@ class Leads
                 )
             );
             $this->setData($data);
-            echo 'new file created and data successfully imported!'.PHP_EOL;
+            echo 'New file created and data successfully imported!'.PHP_EOL;
         }
     }
 
@@ -92,12 +92,12 @@ class Leads
                 $array = array_values($data->items);
                 $data->items = $array;
                 $this->setData($data);
-                echo "succesfully deleted lead with id $id - $firstname $lastname $email\n";
+                echo "Succesfully deleted lead with id $id - $firstname $lastname $email.\n";
             } else {
-                echo 'lead id is not in lead registry'.PHP_EOL;
+                echo 'Lead id is not in lead registry.'.PHP_EOL;
             }
         } else {
-            echo 'nothing to delete, lead registry is empty'.PHP_EOL;
+            echo 'Nothing to delete, lead registry is empty.'.PHP_EOL;
         }
     }
 
@@ -119,27 +119,31 @@ class Leads
             }
         }
         if ($exists == false) {
-            echo 'no leads found matching the search query'.PHP_EOL;
+            echo 'No leads found matching the search query.'.PHP_EOL;
         }
     }
 
     public function import($file) {
         $data = $this->getData();
-        $handle = fopen($file, 'r');
-        $count = 0;
-        while (($csv_data = fgetcsv($handle, 1000)) !== false){
-            array_push($data->items, array(
-                'firstname' => $csv_data[0],
-                'lastname' => $csv_data[1],
-                'email' => $csv_data[2],
-                'phone1' => $csv_data[3],
-                'phone2' => $csv_data[4],
-                'comment' => $csv_data[5]
-            ));
-            $count++;
+        if (file_exists($file)) {
+            $handle = fopen($file, 'r');
+            $count = 0;
+            while (($csv_data = fgetcsv($handle, 1000)) !== false){
+                array_push($data->items, array(
+                    'firstname' => $csv_data[0],
+                    'lastname' => $csv_data[1],
+                    'email' => $csv_data[2],
+                    'phone1' => $csv_data[3],
+                    'phone2' => $csv_data[4],
+                    'comment' => $csv_data[5]
+                ));
+                $count++;
+            }
+            $this->setData($data);
+            echo 'Succesfully imported '.$count.' leads.'.PHP_EOL;
+        } else {
+            echo 'Specified file doesn\'t exist.'.PHP_EOL;
         }
-        $this->setData($data);
-        echo 'succesfully imported '.$count.' leads'.PHP_EOL;
     }
 }
 
@@ -155,18 +159,30 @@ if (count($argv) > 1) {
             echo 'Too few arguments, usage: \'aerolead new [firstname] [lastname] [email] [phone1] [phone2] [\'comment\']\''.PHP_EOL;
         }
     } elseif ($argv[1] == 'delete') {
-        $leads->delete($argv[2]);
+        if (isset($argv[2])) {
+            $leads->delete($argv[2]);
+        } else {
+            echo 'Too few arguments, usage: \'aerolead delete [id]\''.PHP_EOL;
+        }
     } elseif ($argv[1] == 'find') {
-        $leads->find($argv[2]);
+        if (isset($argv[2])) {
+            $leads->find($argv[2]);
+        } else {
+            echo 'Too few arguments, usage: \'aerolead find [pattern]\''.PHP_EOL;
+        }
     } elseif ($argv[1] == 'import') {
-        $leads->import($argv[2]);
+        if (isset($argv[2])) {
+            $leads->import($argv[2]);
+        } else {
+            echo 'Too few arguments, usage: \'aerolead import [filename]\''.PHP_EOL;
+        }
     } elseif ($argv[1] == 'help') {
-        echo "This is Aero lead registration tool.\n\nAvailable commands:\n\nlist - List all registered leads.\nnew [firstname] [lastname] [email] [phone1] [phone2] ['comment'] - Add new lead.\ndelete [id] - Delete existing lead.\nfind [pattern] - Find leads which match the pattern. Looks for matches in firstname, lastname, email fields.\nimport [filename] - Import leads from csv file. Each row must have the following fields in this order: firstname, lastname, email, phone1, phone2, comment.\n";
+        echo "This is Aero lead registration tool.\n\nAvailable commands:\n\nlist - List all registered leads. Displayed in order: firstname, lastname, email, phone1, phone2, comment.\nnew [firstname] [lastname] [email] [phone1] [phone2] ['comment'] - Add new lead. Use single quotes around comment when using more than one word.\ndelete [id] - Delete existing lead. Provided id should be of existing lead in lead registry.\nfind [pattern] - Find leads which match the pattern. Looks for matches in firstname, lastname, email fields.\nimport [filename] - Import leads from csv file. Each row must have the following fields in this order: firstname, lastname, email, phone1, phone2, comment.\n";
     } else {
         echo 'ERROR: Unknown command. Use \'aerotime help\' to see the list of available commands.'.PHP_EOL;
     }
 } else {
-    echo "This is Aero lead registration tool.\n\nAvailable commands:\n\nlist - List all registered leads.\nnew [firstname] [lastname] [email] [phone1] [phone2] ['comment'] - Add new lead.\ndelete [id] - Delete existing lead.\nfind [pattern] - Find leads which match the pattern. Looks for matches in firstname, lastname, email fields.\nimport [filename] - Import leads from csv file. Each row must have the following fields in this order: firstname, lastname, email, phone1, phone2, comment.\n";
+    echo "This is Aero lead registration tool.\n\nAvailable commands:\n\nlist - List all registered leads. Displayed in order: firstname, lastname, email, phone1, phone2, comment.\nnew [firstname] [lastname] [email] [phone1] [phone2] ['comment'] - Add new lead. Use single quotes around comment when using more than one word.\ndelete [id] - Delete existing lead. Provided id should be of existing lead in lead registry.\nfind [pattern] - Find leads which match the pattern. Looks for matches in firstname, lastname, email fields.\nimport [filename] - Import leads from csv file. Each row must have the following fields in this order: firstname, lastname, email, phone1, phone2, comment.\n";
 }
 
 ?>
