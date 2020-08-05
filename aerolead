@@ -100,6 +100,28 @@ class Leads
             echo 'nothing to delete, lead registry is empty'.PHP_EOL;
         }
     }
+
+    public function find($query)
+    {
+        $data = $this->getData();
+        $exists = false;
+        foreach ($data->items as $key => $lead) {
+            if (strpos($lead->firstname, $query) !== false || strpos($lead->lastname, $query) !== false || strpos($lead->email, $query) !== false) {
+                $id = $key + 1;
+                $firstname = $lead->firstname;
+                $lastname = $lead->lastname;
+                $email = $lead->email;
+                $phone1 = $lead->phone1;
+                $phone2 = $lead->phone2;
+                $comment = $lead->comment;
+                echo "$id. $firstname $lastname $email $phone1 $phone2 $comment\n";
+                $exists = true;
+            }
+        }
+        if ($exists == false) {
+            echo 'no leads found matching the search query'.PHP_EOL;
+        }
+    }
 }
 
 ## Check args
@@ -115,13 +137,15 @@ if (count($argv) > 1) {
         }
     } elseif ($argv[1] == 'delete') {
         $leads->delete($argv[2]);
+    } elseif ($argv[1] == 'find') {
+        $leads->find($argv[2]);
     } elseif ($argv[1] == 'help') {
-        echo "This is Aero lead registration tool.\n\nAvailable commands:\n\nlist - List all registered leads.\nnew [firstname] [lastname] [email] [phone1] [phone2] ['comment'] - Add new lead.\ndelete [id] - Delete existing lead.\n";
+        echo "This is Aero lead registration tool.\n\nAvailable commands:\n\nlist - List all registered leads.\nnew [firstname] [lastname] [email] [phone1] [phone2] ['comment'] - Add new lead.\ndelete [id] - Delete existing lead.\nfind [pattern] - Find leads which match the pattern. Looks for matches in firstname, lastname, email fields.\n";
     } else {
-        echo 'ERROR: Unknown command. Use \'aerotime help\' to see the list of available commands.';
+        echo 'ERROR: Unknown command. Use \'aerotime help\' to see the list of available commands.'.PHP_EOL;
     }
 } else {
-    echo "This is Aero lead registration tool.\n\nAvailable commands:\n\nlist - List all registered leads.\nnew [firstname] [lastname] [email] [phone1] [phone2] ['comment'] - Add new lead.\ndelete [id] - Delete existing lead.\n";
+    echo "This is Aero lead registration tool.\n\nAvailable commands:\n\nlist - List all registered leads.\nnew [firstname] [lastname] [email] [phone1] [phone2] ['comment'] - Add new lead.\ndelete [id] - Delete existing lead.\nfind [pattern] - Find leads which match the pattern. Looks for matches in firstname, lastname, email fields.\n";
 }
 
 ?>
