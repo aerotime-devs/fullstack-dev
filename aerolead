@@ -5,13 +5,36 @@ class Leads
 {
     private $datafile = 'leads.json';
 
-    private function fileExists()
+    public function __construct()
     {
-        if (file_exists($this->datafile)) {
+        if (file_exists($this->datafile) == false) {
+            $data = (object) array(
+                'updated_at' => time(),
+                'items' => array()
+            );
+            $this->setData($data);
+        }
+    }
+
+    public function isEmpty()
+    {
+        $data = $this->getData();
+        if (empty($data->items)) {
             return true;
         } else {
             return false;
         }
+    }
+
+    public function isDuplicate($email)
+    {
+        $data = $this->getData();
+        foreach ($data->items as $lead) {
+            if ($lead->email == $email) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private function getData()
@@ -29,7 +52,7 @@ class Leads
 
     public function list()
     {
-        if ($this->fileExists()) {
+        if ($this->isEmpty() !== true) {
             $data = $this->getData();
             foreach ($data->items as $key => $lead) {
                 $id = $key + 1;
@@ -48,7 +71,7 @@ class Leads
 
     public function new($firstname, $lastname, $email, $phone1, $phone2, $comment)
     {
-        if ($this->fileExists()) {
+        if ($this->isDuplicate($email) !== true) {
             $data = $this->getData();
             array_push($data->items, array(
                 'firstname' => $firstname,
@@ -61,27 +84,13 @@ class Leads
             $this->setData($data);
             echo 'New lead was added successfully!'.PHP_EOL;
         } else {
-            $data = array(
-                'updated_at' => time(),
-                'items' => array(
-                    array(
-                        'firstname' => $firstname,
-                        'lastname' => $lastname,
-                        'email' => $email,
-                        'phone1' => $phone1,
-                        'phone2' => $phone2,
-                        'comment' => $comment
-                    )
-                )
-            );
-            $this->setData($data);
-            echo 'New file created and data successfully imported!'.PHP_EOL;
+            echo 'ERROR: Duplicate entry. Lead with this email already exists in the lead registry.'.PHP_EOL;
         }
     }
 
     public function delete($id)
     {
-        if ($this->fileExists()) {
+        if ($this->isEmpty() !== true) {
             $data = $this->getData();
             $i = $id - 1;
             if (isset($data->items[$i])) {
@@ -103,41 +112,50 @@ class Leads
 
     public function find($query)
     {
-        $data = $this->getData();
-        $exists = false;
-        foreach ($data->items as $key => $lead) {
-            if (strpos($lead->firstname, $query) !== false || strpos($lead->lastname, $query) !== false || strpos($lead->email, $query) !== false) {
-                $id = $key + 1;
-                $firstname = $lead->firstname;
-                $lastname = $lead->lastname;
-                $email = $lead->email;
-                $phone1 = $lead->phone1;
-                $phone2 = $lead->phone2;
-                $comment = $lead->comment;
-                echo "$id. $firstname $lastname $email $phone1 $phone2 $comment\n";
-                $exists = true;
+        if ($this->isEmpty() !== true) {
+            $data = $this->getData();
+            $exists = false;
+            foreach ($data->items as $key => $lead) {
+                if (strpos($lead->firstname, $query) !== false || strpos($lead->lastname, $query) !== false || strpos($lead->email, $query) !== false) {
+                    $id = $key + 1;
+                    $firstname = $lead->firstname;
+                    $lastname = $lead->lastname;
+                    $email = $lead->email;
+                    $phone1 = $lead->phone1;
+                    $phone2 = $lead->phone2;
+                    $comment = $lead->comment;
+                    echo "$id. $firstname $lastname $email $phone1 $phone2 $comment\n";
+                    $exists = true;
+                }
             }
-        }
-        if ($exists == false) {
-            echo 'No leads found matching the search query.'.PHP_EOL;
+            if ($exists == false) {
+                echo 'No leads found matching the search query.'.PHP_EOL;
+            }
+        } else {
+            echo 'Nothing to find, lead registry is empty.'.PHP_EOL;
         }
     }
 
-    public function import($file) {
+    public function import($file)
+    {
         $data = $this->getData();
         if (file_exists($file)) {
             $handle = fopen($file, 'r');
             $count = 0;
-            while (($csv_data = fgetcsv($handle, 1000)) !== false){
-                array_push($data->items, array(
-                    'firstname' => $csv_data[0],
-                    'lastname' => $csv_data[1],
-                    'email' => $csv_data[2],
-                    'phone1' => $csv_data[3],
-                    'phone2' => $csv_data[4],
-                    'comment' => $csv_data[5]
-                ));
-                $count++;
+            while (($csv_data = fgetcsv($handle, 1000)) !== false) {
+                if ($this->isDuplicate($csv_data[2]) !== true) {
+                    array_push($data->items, array(
+                        'firstname' => $csv_data[0],
+                        'lastname' => $csv_data[1],
+                        'email' => $csv_data[2],
+                        'phone1' => $csv_data[3],
+                        'phone2' => $csv_data[4],
+                        'comment' => $csv_data[5]
+                    ));
+                    $count++;
+                } else {
+                    echo 'ERROR: Duplicate entry. Lead with email '.$csv_data[2].' already exists in the lead registry.'.PHP_EOL;
+                }
             }
             $this->setData($data);
             echo 'Succesfully imported '.$count.' leads.'.PHP_EOL;
@@ -177,12 +195,12 @@ if (count($argv) > 1) {
             echo 'Too few arguments, usage: \'aerolead import [filename]\''.PHP_EOL;
         }
     } elseif ($argv[1] == 'help') {
-        echo "This is Aero lead registration tool.\n\nAvailable commands:\n\nlist - List all registered leads. Displayed in order: firstname, lastname, email, phone1, phone2, comment.\nnew [firstname] [lastname] [email] [phone1] [phone2] ['comment'] - Add new lead. Use single quotes around comment when using more than one word.\ndelete [id] - Delete existing lead. Provided id should be of existing lead in lead registry.\nfind [pattern] - Find leads which match the pattern. Looks for matches in firstname, lastname, email fields.\nimport [filename] - Import leads from csv file. Each row must have the following fields in this order: firstname, lastname, email, phone1, phone2, comment.\n";
+        echo "This is Aero lead registration tool.\n\nAvailable commands:\n\nlist - List all registered leads. Displayed in order: firstname, lastname, email, phone1, phone2, comment.\nnew [firstname] [lastname] [email] [phone1] [phone2] ['comment'] - Add new lead. Use single quotes around comment when using more than one word.\ndelete [id] - Delete existing lead. Provided id should be of existing lead in the lead registry.\nfind [pattern] - Find leads which match the pattern. Looks for matches in firstname, lastname, email fields.\nimport [filename] - Import leads from csv file. Each row must have the following fields in this order: firstname, lastname, email, phone1, phone2, comment.\n";
     } else {
         echo 'ERROR: Unknown command. Use \'aerotime help\' to see the list of available commands.'.PHP_EOL;
     }
 } else {
-    echo "This is Aero lead registration tool.\n\nAvailable commands:\n\nlist - List all registered leads. Displayed in order: firstname, lastname, email, phone1, phone2, comment.\nnew [firstname] [lastname] [email] [phone1] [phone2] ['comment'] - Add new lead. Use single quotes around comment when using more than one word.\ndelete [id] - Delete existing lead. Provided id should be of existing lead in lead registry.\nfind [pattern] - Find leads which match the pattern. Looks for matches in firstname, lastname, email fields.\nimport [filename] - Import leads from csv file. Each row must have the following fields in this order: firstname, lastname, email, phone1, phone2, comment.\n";
+    echo "This is Aero lead registration tool.\n\nAvailable commands:\n\nlist - List all registered leads. Displayed in order: firstname, lastname, email, phone1, phone2, comment.\nnew [firstname] [lastname] [email] [phone1] [phone2] ['comment'] - Add new lead. Use single quotes around comment when using more than one word.\ndelete [id] - Delete existing lead. Provided id should be of existing lead in the lead registry.\nfind [pattern] - Find leads which match the pattern. Looks for matches in firstname, lastname, email fields.\nimport [filename] - Import leads from csv file. Each row must have the following fields in this order: firstname, lastname, email, phone1, phone2, comment.\n";
 }
 
 ?>
