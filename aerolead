@@ -37,6 +37,22 @@ class Leads
         return false;
     }
 
+    public function isEmail($email)
+    {
+        if (strpos($email, '@') !== false && strpos($email, '.') !== false) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function getDateTime($timestamp, $timezone = 'Europe/Vilnius')
+    {
+        $dtime = new DateTime('@'.$timestamp);
+        $dtime->setTimezone(new DateTimeZone($timezone));
+        return $dtime->format('Y-m-d H:i:s O');
+    }
+
     private function getData()
     {
         $json = file_get_contents($this->datafile);
@@ -54,6 +70,8 @@ class Leads
     {
         if ($this->isEmpty() !== true) {
             $data = $this->getData();
+            $datetime = $this->getDateTime($data->updated_at);
+            echo 'Last updated at '.$datetime.PHP_EOL;
             foreach ($data->items as $key => $lead) {
                 $id = $key + 1;
                 $firstname = $lead->firstname;
@@ -71,20 +89,24 @@ class Leads
 
     public function new($firstname, $lastname, $email, $phone1, $phone2, $comment)
     {
-        if ($this->isDuplicate($email) !== true) {
-            $data = $this->getData();
-            array_push($data->items, array(
-                'firstname' => $firstname,
-                'lastname' => $lastname,
-                'email' => $email,
-                'phone1' => $phone1,
-                'phone2' => $phone2,
-                'comment' => $comment
-            ));
-            $this->setData($data);
-            echo 'New lead was added successfully!'.PHP_EOL;
+        if ($this->isEmail($email) == true) {
+            if ($this->isDuplicate($email) !== true) {
+                $data = $this->getData();
+                array_push($data->items, array(
+                    'firstname' => $firstname,
+                    'lastname' => $lastname,
+                    'email' => $email,
+                    'phone1' => $phone1,
+                    'phone2' => $phone2,
+                    'comment' => $comment
+                ));
+                $this->setData($data);
+                echo 'New lead was added successfully!'.PHP_EOL;
+            } else {
+                echo 'ERROR: Duplicate entry. Lead with this email already exists in the lead registry.'.PHP_EOL;
+            }
         } else {
-            echo 'ERROR: Duplicate entry. Lead with this email already exists in the lead registry.'.PHP_EOL;
+            echo 'ERROR: Email '.$email.' is not a valid email address.'.PHP_EOL;
         }
     }
 
@@ -101,7 +123,7 @@ class Leads
                 $array = array_values($data->items);
                 $data->items = $array;
                 $this->setData($data);
-                echo "Succesfully deleted lead with id $id - $firstname $lastname $email.\n";
+                echo "Successfully deleted lead with id $id - $firstname $lastname $email.\n";
             } else {
                 echo 'Lead id is not in lead registry.'.PHP_EOL;
             }
@@ -143,22 +165,26 @@ class Leads
             $handle = fopen($file, 'r');
             $count = 0;
             while (($csv_data = fgetcsv($handle, 1000)) !== false) {
-                if ($this->isDuplicate($csv_data[2]) !== true) {
-                    array_push($data->items, array(
-                        'firstname' => $csv_data[0],
-                        'lastname' => $csv_data[1],
-                        'email' => $csv_data[2],
-                        'phone1' => $csv_data[3],
-                        'phone2' => $csv_data[4],
-                        'comment' => $csv_data[5]
-                    ));
-                    $count++;
+                if ($this->isEmail($csv_data[2]) == true) {
+                    if ($this->isDuplicate($csv_data[2]) !== true) {
+                        array_push($data->items, array(
+                            'firstname' => $csv_data[0],
+                            'lastname' => $csv_data[1],
+                            'email' => $csv_data[2],
+                            'phone1' => $csv_data[3],
+                            'phone2' => $csv_data[4],
+                            'comment' => $csv_data[5]
+                        ));
+                        $count++;
+                    } else {
+                        echo 'ERROR: Duplicate entry. Lead with email '.$csv_data[2].' already exists in the lead registry.'.PHP_EOL;
+                    }
                 } else {
-                    echo 'ERROR: Duplicate entry. Lead with email '.$csv_data[2].' already exists in the lead registry.'.PHP_EOL;
+                    echo 'ERROR: Email '.$csv_data[2].' is not a valid email address.'.PHP_EOL;
                 }
             }
             $this->setData($data);
-            echo 'Succesfully imported '.$count.' leads.'.PHP_EOL;
+            echo 'Successfully imported '.$count.' leads.'.PHP_EOL;
         } else {
             echo 'Specified file doesn\'t exist.'.PHP_EOL;
         }
