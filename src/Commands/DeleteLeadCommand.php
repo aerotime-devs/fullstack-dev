@@ -2,7 +2,10 @@
 
 namespace MekDrop\FlatLeadsDB\Commands;
 
-use MekDrop\FlatLeadsDB\Services\PsiaudoDatabase;
+use Exception;
+use MekDrop\FlatLeadsDB\Exceptions\NotFoundRecordException;
+use MekDrop\FlatLeadsDB\Models\Lead;
+use MekDrop\FlatLeadsDB\Services\PseudoDatabase;
 
 /**
  * Command that deletes lead from local database
@@ -12,19 +15,33 @@ use MekDrop\FlatLeadsDB\Services\PsiaudoDatabase;
 class DeleteLeadCommand extends \Ahc\Cli\Input\Command
 {
     /**
-     * @var PsiaudoDatabase
+     * @var PseudoDatabase
      */
     private $db;
 
     /**
      * @inheritDoc
      */
-    public function __construct(PsiaudoDatabase $database)
+    public function __construct(PseudoDatabase $database)
     {
         parent::__construct('delete', 'Deletes existing lead');
 
         $this->argument('<email>', 'Email to search lead and delete');
         $this->db = $database;
+    }
+
+    /**
+     * Execute command
+     */
+    public function execute() {
+        $args = $this->args();
+
+        try {
+            $this->db->deleteById(Lead::class, $args['email']);
+            $this->writer()->info('Lead deleted successfully!', true);
+        } catch (NotFoundRecordException $exception) {
+            $this->writer()->error('Record not found', true);
+        }
     }
 
 }

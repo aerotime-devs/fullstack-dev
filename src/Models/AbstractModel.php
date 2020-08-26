@@ -11,7 +11,25 @@ use Imponeer\ToArrayInterface;
  */
 abstract class AbstractModel implements ToArrayInterface
 {
+    /**
+     * Internal data
+     *
+     * @var array
+     * @internal
+     */
     private $data = [];
+
+    /**
+     * Constructor.
+     *
+     * @param array $data Data for the model
+     */
+    public function __construct(array $data = [])
+    {
+        foreach ($data as $key => $value) {
+            $this->$key = $value;
+        }
+    }
 
     /**
      * Gets validation rules in form [field => rules]
