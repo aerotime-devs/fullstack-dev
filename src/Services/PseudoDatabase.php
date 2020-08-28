@@ -31,10 +31,16 @@ class PseudoDatabase
 
     /**
      * PsiaudoDatabase constructor.
+     *
+     * @param string|null $path If path specified, use this path as file storage place
      */
-    public function __construct()
+    public function __construct(?string $path = null)
     {
-        $this->path = dirname(dirname(__DIR__) ) . '/data/';
+        if ($path === null) {
+            $this->path = dirname(dirname(__DIR__)) . '/data/';
+        } else {
+            $this->path = $path;
+        }
     }
 
     /**

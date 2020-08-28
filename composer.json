@@ -10,6 +10,8 @@
         "imponeer/toarray-interface": "^2.0"
     },
     "require-dev": {
+        "fzaninotto/faker": "^1.9",
+        "mikey179/vfsstream": "^1.6",
         "phpunit/phpunit": "^9.3"
     },
     "autoload": {
@@ -23,5 +25,10 @@
             "name": "Raimondas Rimkevičius",
             "email": "github@mekdrop.name"
         }
-    ]
+    ],
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true,
+        "bin-dir": "bin"
+    }
 }
