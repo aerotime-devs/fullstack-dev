@@ -2,6 +2,7 @@
 
 namespace MekDrop\FlatLeadsDB\Commands;
 
+use Ahc\Cli\Input\Command;
 use League\Csv\CannotInsertRecord;
 use League\Csv\Reader;
 use MekDrop\FlatLeadsDB\Models\Lead;
@@ -12,7 +13,7 @@ use MekDrop\FlatLeadsDB\Services\PseudoDatabase;
  *
  * @package MekDrop\FlatLeadsDB\Commands
  */
-class ImportCommand extends \Ahc\Cli\Input\Command
+class ImportCommand extends Command
 {
     /**
      * @var PseudoDatabase
@@ -40,7 +41,7 @@ class ImportCommand extends \Ahc\Cli\Input\Command
 
         if (!file_exists($file)) {
             $this->writer()->error('File not exists', true);
-            return;
+            return 3;
         }
 
         $reader = Reader::createFromPath($file, 'r');

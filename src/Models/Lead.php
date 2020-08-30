@@ -26,7 +26,7 @@ class Lead extends AbstractModel
         return [
             'firstName' => 'required | MinLength(min=1)',
             'lastName' => 'required | MinLength(min=1)',
-            'email' => 'required | email | EmailDomain',
+            'email' => 'required | email',
             'phone1' => 'required',
             'phone2' => null,
             'comment' => null

@@ -19,6 +19,11 @@
             "MekDrop\\FlatLeadsDB\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "MekDrop\\FlatLeadsDB\\Tests\\": "tests/"
+        }
+    },
     "license": "MIT",
     "authors": [
         {

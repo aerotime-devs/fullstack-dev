@@ -150,8 +150,28 @@ class PseudoDatabase
      * @param AbstractCsv $csv Reader or writer
      * @throws Exception
      */
-    protected function setConfig(AbstractCsv $csv) {
+    protected function setConfig(AbstractCsv $csv)
+    {
         $csv->setDelimiter(';');
+    }
+
+    /**
+     * Deletes all data in database
+     *
+     * @param string $modelClass Model for what to delete database
+     *
+     * @throws ReflectionException
+     */
+    public function clear(string $modelClass): void
+    {
+        $filename = $this->getFileFromClass($modelClass);
+        if (file_exists($filename)) {
+            @unlink($filename);
+        }
+        $filename .= '.tmp';
+        if (file_exists($filename)) {
+            @unlink($filename);
+        }
     }
 
     /**
@@ -161,7 +181,8 @@ class PseudoDatabase
      *
      * @throws CannotInsertRecord|Exception|ReflectionException
      */
-    public function insert(AbstractModel $model) {
+    public function insert(AbstractModel $model)
+    {
         $writer = Writer::createFromPath(
             $this->getFileFromModel($model),
             'a+'
@@ -197,7 +218,7 @@ class PseudoDatabase
         );
         $processed = $statement->where(
             static function ($crow) use ($id, $idIndex) {
-                return $crow[$idIndex] === $id;
+                return $crow[$idIndex] !== $id;
             }
         )->process($reader);
 

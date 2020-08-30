@@ -2,7 +2,7 @@
 
 namespace MekDrop\FlatLeadsDB\Commands;
 
-use Exception;
+use Ahc\Cli\Input\Command;
 use MekDrop\FlatLeadsDB\Exceptions\NotFoundRecordException;
 use MekDrop\FlatLeadsDB\Models\Lead;
 use MekDrop\FlatLeadsDB\Services\PseudoDatabase;
@@ -12,7 +12,7 @@ use MekDrop\FlatLeadsDB\Services\PseudoDatabase;
  *
  * @package MekDrop\FlatLeadsDB\Commands
  */
-class DeleteLeadCommand extends \Ahc\Cli\Input\Command
+class DeleteLeadCommand extends Command
 {
     /**
      * @var PseudoDatabase
@@ -33,7 +33,8 @@ class DeleteLeadCommand extends \Ahc\Cli\Input\Command
     /**
      * Execute command
      */
-    public function execute() {
+    public function execute()
+    {
         $args = $this->args();
 
         try {
@@ -41,7 +42,10 @@ class DeleteLeadCommand extends \Ahc\Cli\Input\Command
             $this->writer()->info('Lead deleted successfully!', true);
         } catch (NotFoundRecordException $exception) {
             $this->writer()->error('Record not found', true);
+            return 2;
         }
+
+        return 0;
     }
 
 }

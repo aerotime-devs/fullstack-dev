@@ -2,18 +2,17 @@
 
 namespace MekDrop\FlatLeadsDB\Commands;
 
-use Ahc\Cli\IO\Interactor;
+use Ahc\Cli\Input\Command;
 use League\Csv\CannotInsertRecord;
 use MekDrop\FlatLeadsDB\Models\Lead;
 use MekDrop\FlatLeadsDB\Services\PseudoDatabase;
-use Sirius\Validation\Validator;
 
 /**
  * Command that registers new lead
  *
  * @package MekDrop\FlatLeadsDB\Commands
  */
-class RegisterNewLeadCommand extends \Ahc\Cli\Input\Command
+class RegisterNewLeadCommand extends Command
 {
     /**
      * @var PseudoDatabase
@@ -56,6 +55,7 @@ class RegisterNewLeadCommand extends \Ahc\Cli\Input\Command
             $this->writer()->info('Lead added successfully!', true);
         } catch (CannotInsertRecord $exception) {
             $this->writer()->error($exception->getMessage() . ' - ' . $exception->getName(), true);
+            return 4;
         }
     }
 
