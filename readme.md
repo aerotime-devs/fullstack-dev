@@ -1,3 +1,9 @@
+# Jobtest for Aerotime.eu: Simple Leads Database
+
+## Original task
+
+<blockquote>
+  
 **How-To**
 - Fork this repo.
 - Complete task fulfilling requirements.
@@ -28,3 +34,12 @@ firstname;lastname;email;phonenumber1;phonenumber2;comment;
 - Include at least 3 unit tests
 - Application Data should be stored in file
 - Provide brief information what wasn’t implemented and what can be improved
+
+</blockquote>
+
+### Things to improve/implement
+
+* Write more tests
+* Implement write concurrency for database
+* Do many optimizations
+* Add glob style search for find command
