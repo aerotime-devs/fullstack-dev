@@ -85,7 +85,7 @@ php run.php importPersonsUsingCsvFile test.csv
 ./vendor/bin/phpunit
 ```
 
-##**Requirements are:**
+## **Requirements are:**
 
 - All commands are executed from CLI
 - Application should not use any framework
@@ -93,10 +93,10 @@ php run.php importPersonsUsingCsvFile test.csv
 - Application Data should be stored in file
 - Provide brief information what wasn’t implemented and what can be improved:
 
-####**What can be improved:**
+#### **What can be improved:**
 - **PhpUnit test**
 
-####Potential problem areas to think about:
+#### Potential problem areas to think about:
 
 - Duplicated persons
     - **Duplicated persons not added in JSON file**
