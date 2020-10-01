@@ -28,3 +28,4 @@ firstname;lastname;email;phonenumber1;phonenumber2;comment;
 - Include at least 3 unit tests
 - Application Data should be stored in file
 - Provide brief information what wasn’t implemented and what can be improved
+- Use php <=7.1.4
